@@ -1,0 +1,10 @@
+#!/bin/bash
+# (c) 2015 Tim Sawyer, All Rights Reserved
+
+SRC_DIR=~/web/icc/
+DEST_DIR=tjs@bbr.default.tsawyer.uk0.bigv.io:web/icc
+EXCLUDES=~/web/bbr/upload_excludes.txt
+
+RSYNC_OPTS="-avz --exclude-from=$EXCLUDES"
+
+rsync $RSYNC_OPTS $SRC_DIR $DEST_DIR

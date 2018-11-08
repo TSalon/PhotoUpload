@@ -1,0 +1,120 @@
+{% extends "competition/template.html" %}
+{% load thumbnail %}
+
+{% block body %}
+<p>Welcome {{Competitor.first_name|title}} [<a href="/">Logout</a>] [<a href="/">not {{Competitor.first_name|title}}?</a>]</p>
+
+{% if EntryForm.non_field_errors %}
+<div class="alert alert-danger" role="alert">{{ EntryForm.non_field_errors }}</div>
+{% endif%}
+{% if EntryForm.title.errors %}
+<div class="alert alert-danger" role="alert"><ul><li>You must enter a title for your picture</li></ul></div>
+{% endif %}
+{% if 'This field is required' in  EntryForm.photo.errors %}
+<div class="alert alert-danger" role="alert"><ul><li>Please select an image file to upload</li></ul></div>
+{% endif %}
+{% if 'SRGB' in  EntryForm.photo.errors %}
+<div class="alert alert-danger" role="alert"><ul><li>The image uploaded does not appear to be in the sRGB colour space</li></ul></div>
+{% endif %}
+
+<p>&lt;&lt;&lt;<a href="/entries/{{Hash}}/{{Competitor.member_number}}/{{Competitor.surname}}/">Back To Home</a></p>
+
+<hr/>
+<h2>{{Competition.judge_date|date:"jS F Y"}} - {{Competition.name}}</h2>
+<div class="small">{{Competition.entrycountdescription}}, last entries {{Competition.end_date|date:"l, jS F Y"}}.</div>
+<div class="well well-sm">{{Competition.description|linebreaksbr}}</div>
+{% if Competition.Entries.count >= Competition.min_photos %}
+<div class="alert alert-success fade in"><strong>Success!</strong> Your entries have been accepted and will be included in the competition.</div>
+{% else %}
+{% if Competition.Entries.count >= 1 %}
+<div class="alert alert-warning">A minimum of {{Competition.min_photos}} images are required for this competition.</div>
+{% endif %}
+{% endif %}
+
+{% if Competition.Entries.count > 0 %}
+<p>[<a onClick="return checkDelete()" href="/competition/delete/{{Hash}}/{{Competitor.member_number}}/{{Competitor.surname}}/{{Competition.id}}/">Delete your entries for {{Competition.judge_date|date:"jS F Y"}} - {{Competition.name}}</a>]</p>
+{% endif %}
+
+<table class="table table-hover table-responsive">
+{% for entry in Competition.Entries %}
+<tr>
+  <td>{{entry.position}}</td>
+  <td>
+    {% thumbnail entry.photo "100x100" crop="center" as im %}
+      <a href="{{entry.photo.url}}"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="img-thumbnail"></a>
+    {% endthumbnail %}
+  </td>
+  <td>{{entry.title}}</td>
+</tr>
+{% endfor %}
+</table>
+
+{% if Competition.UploadMorePhotos %}
+<div class="panel panel-default">
+<div class="panel-heading"><strong>Upload An Entry for {{Competition.name}}</strong></div>
+<div class="panel-body">
+<form action="/competition/addentry/{{Competition.id}}/{{Hash}}/{{Competitor.member_number}}/{{Competitor.surname}}/" method="post" enctype="multipart/form-data" class="form-horizontal">
+{%csrf_token%}
+  <fieldset>
+        {% for field in EntryForm %}
+            {% if field.errors %}
+                <div class="control-group error">
+                    <label class="control-label">{{ field.label }}</label> 
+                    <div class="controls">{{ field }}
+                        <span class="help-inline">
+                            {% for error in  field.errors %}{{ error }}{% endfor %}
+                        </span>
+                    </div>
+                </div>
+            {% else %}
+                <div class="control-group">
+                    <label class="control-label">{{ field.label }}</label> 
+                    <div class="controls">{{ field }}
+                        {% if field.help_text %}
+                            <p class="help-inline"><small>{{ field.help_text }}</small></p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endif %}
+        {% endfor %}
+    </fieldset>
+    <div class="form-actions">
+        <button type="submit" class="btn btn-primary">Submit</button>
+    </div>
+</form>
+</div>
+</div>
+{% endif %}
+
+<script type="text/javascript">
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
+
+$('input#id_photo').change(function(){
+  var lFilename = $(this).val().split('\\').pop();
+  if (lFilename.toLowerCase().endsWith('.jpg')){
+    lFilename = lFilename.substring(0, lFilename.length - ".jpg".length);
+  }
+  if (lFilename.toLowerCase().endsWith(".jpeg")){
+  lFilename = lFilename.substring(0, lFilename.length - ".jpeg".length);
+  }
+  var lParts = lFilename.split('_');
+  var lPartsCount = lParts.length;
+  if (lPartsCount > 2 && $.isNumeric(lParts[lPartsCount-1]) && $.isNumeric(lParts[lPartsCount-2])){
+    lFilename = lFilename.substring(0, lFilename.lastIndexOf("_"));
+    lFilename = lFilename.substring(0, lFilename.lastIndexOf("_"));
+  }
+  $(this).parent().parent().parent().find('input[type=text]').val(lFilename);
+});
+
+function checkDelete() {
+  var lConfirmed = confirm("Are you sure?  This will remove all your entries for this competition.");
+  return lConfirmed;
+}
+
+</script>
+
+{%endblock%}

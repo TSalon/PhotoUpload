@@ -1,0 +1,21 @@
+{% extends "competition/template.html" %}
+{% load thumbnail %}
+
+{% block body %}
+<h1>List of all Entries</h1>
+
+<table>
+{% for entry in Entries %}
+<tr>
+  <td>
+    {% thumbnail entry.photo "100x100" crop="center" as im %}
+      <a href="{{entry.photo.url}}"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="img-thumbnail"></a>
+    {% endthumbnail %}
+  </td>
+  <td>{{entry.title}}</td>
+  <td>{{entry.owner.surname}}, {{entry.owner.first_name}} ({{entry.owner.member_number}})</td>
+  <td>{{entry.competition.name}} on {{entry.competition.judge_date}}</td>
+</tr>
+{% endfor %}
+</table>
+{%endblock%}

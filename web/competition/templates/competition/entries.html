@@ -1,0 +1,87 @@
+{% extends "competition/template.html" %}
+{% load thumbnail %}
+
+{% block body %}
+<p>Welcome {{Competitor.first_name|title}} [<a href="/">Logout</a>] [<a href="/">not {{Competitor.first_name|title}}?</a>]</p>
+<h2>Image Format Rules</h2>
+<ul>
+<li>JPEG format at maximum quality</li>
+<li>RGB mode (for both colour and monochrome images)</li>
+<li>In the sRGB colour space.</li>
+</ul>
+<p>Images must not exceed 1400 pixels wide by 1050 pixels high whether you are using landscape or portrait format, and either the height should be 1050px or the width should be 1400px.  Provided this is done, the other dimension can be smaller.  Scale your original image down proportionately so it fills either the 1400px wide or 1050px high or both.  Any image which is less than the maximum pixels allowed, either horizontally or vertically the non-image areas should NOT be filled.</p>
+
+{% if ClubCompetitions %}
+<hr/>
+<h2>Club Competitions</h2>
+<table class="table table-striped">
+  <tr><th>Judge Date</th><th>Competition</th><th>Closing Date</th><th>Your Entries</th></tr>
+{% for competition in ClubCompetitions %}
+  <tr><td>{{competition.judge_date}}</td><td><a href="/competition/{{competition.id}}/{{Hash}}/{{Competitor.member_number}}/{{Competitor.surname}}/">{{competition.name}}</a></td><td>{{competition.end_date}}</td><td>{{competition.EntryCount}} image(s)</td><td></tr>
+{% endfor %}
+</table>
+{% endif %}
+
+{% if ExternalCompetitions %}
+<h2>External Competitions</h2>
+<table class="table table-striped">
+  <tr><th>Judge Date</th><th>Competition</th><th>Closing Date</th><th>Your Entries</th></tr>
+{% for competition in ExternalCompetitions %}
+  <tr><td>{{competition.judge_date}}</td><td><a href="/competition/{{competition.id}}/{{Hash}}/{{Competitor.member_number}}/{{Competitor.surname}}/">{{competition.name}}</a></td><td>{{competition.end_date}}</td><td>{{competition.EntryCount}} image(s)</td><td></tr>
+{% endfor %}
+</table>
+{% endif %}
+
+
+{% if ClosedCompetitions %}
+<hr/><hr/>
+
+<h2>Closed Competitions</h2>
+{% for competition in ClosedCompetitions %}
+{% if competition.Entries %}
+<h3>{{competition.judge_date|date:"jS F Y"}} - {{competition.name}}</h3>
+
+<table class="table">
+<tr>
+{% for entry in competition.Entries %}
+  <td width="{{competition.width}}%">
+    {% thumbnail entry.photo "100x100" crop="center" as im %}
+      <a href="{{entry.photo.url}}"><img src="{{ im.url }}" width="{{ im.width }}" height="{{ im.height }}" class="img-thumbnail"></a>
+    {% endthumbnail %}<br/>{{entry.position}}. {{entry.title}}
+  </td>
+{% endfor %}  
+</tr>
+</table>
+{% endif %}
+
+{% endfor %}
+{% endif %}
+
+
+<script type="text/javascript">
+if (typeof String.prototype.endsWith !== 'function') {
+    String.prototype.endsWith = function(suffix) {
+        return this.indexOf(suffix, this.length - suffix.length) !== -1;
+    };
+}
+
+$('input#id_photo').change(function(){
+  var lFilename = $(this).val().split('\\').pop();
+  if (lFilename.toLowerCase().endsWith('.jpg')){
+    lFilename = lFilename.substring(0, lFilename.length - ".jpg".length);
+  }
+  if (lFilename.toLowerCase().endsWith(".jpeg")){
+  lFilename = lFilename.substring(0, lFilename.length - ".jpeg".length);
+  }
+  var lParts = lFilename.split('_');
+  var lPartsCount = lParts.length;
+  if (lPartsCount > 2 && $.isNumeric(lParts[lPartsCount-1]) && $.isNumeric(lParts[lPartsCount-2])){
+    lFilename = lFilename.substring(0, lFilename.lastIndexOf("_"));
+    lFilename = lFilename.substring(0, lFilename.lastIndexOf("_"));
+  }
+  $(this).parent().parent().parent().find('input[type=text]').val(lFilename);
+});
+
+</script>
+
+{%endblock%}

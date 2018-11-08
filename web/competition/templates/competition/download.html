@@ -1,0 +1,15 @@
+{% extends "competition/template.html" %}
+
+{% block body %}
+<h1>Download Competition Entries</h1>
+
+<table class="table table-bordered table-striped">
+  <thead><tr class="info"><th>Judge Date</th><th>Download All</th><th>Closing Date</th><th>Entries</th><tr></thead>
+  <tbody>
+{% for competition in Competitions %}
+    <tr class="{{competition.status_class}}"><td>{{competition.judge_date}}</td><td><a href="{{competition.download_url}}">{{competition.name}}</a></td><td>{{competition.end_date}}</td><td>{{competition.entrycount}}<tr>
+{% endfor %}
+  </tbody>
+</table>
+
+{%endblock%}
