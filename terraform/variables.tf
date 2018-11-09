@@ -11,17 +11,31 @@ variable "region" {
     default = "eu-west-1"
 }
 
+variable "zones" {
+    type = "map"
+    default = {
+      "eu-west-1" = "eu-west-1a"
+    }
+}
+
+variable "zones_secondary" {
+    type = "map"
+    default = {
+      "eu-west-1" = "eu-west-1b"
+    }
+}
+
 variable "ec2ami" {
     type = "map"
     default = {
-        "eu-west-2" = "ami-02d7859cef54f67bb"
+        "eu-west-1" = "ami-05cdaf7e7b6c76277"
     }
 }
 
 variable "keypair" {
     type = "map"
     default = {
-        "eu-west-2" = "tsalon-ireland"
+        "eu-west-1" = "tsalon-ireland"
     }
 }
 

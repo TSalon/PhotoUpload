@@ -7,4 +7,5 @@ Website to allow users to upload photos for competitions
 - a user with access to:
   - RDS Full Access
   - S3 Full Access
+  - EC2 Full Access
 - aws command line client configured with access as this user

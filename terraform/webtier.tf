@@ -1,13 +1,3 @@
-resource "aws_iam_role" "webtier-role" {
-    name = "webtier-role"
-    assume_role_policy = "${file("assume-role-policy.json")}"
-}
-
-resource "aws_iam_instance_profile" "webtier-profile" {
-    name = "webtier-profile"
-    role = "${aws_iam_role.webtier-role.name}"
-}
-
 data "template_file" "pgpass" {
     template = "$${pg_host}:$${pg_port}:$${pg_dbname}:$${pg_username}:$${pg_password}"
 
@@ -39,7 +29,7 @@ data "template_file" "django-settings-live" {
     template = "${file("settings-live.tpl.py")}" 
     vars {
         dbHost = "${aws_db_instance.tsalon-db.address}"
-        dbPasswordTSalon = "${var.db_password_tsalon}"
+        dbPasswordPhotoSalon = "${var.db_password_tsalon}"
         djangoSecretKey = "${var.django_secret_key}"
 	    region = "${var.region}"
     }
@@ -49,8 +39,12 @@ resource "aws_instance" "tsalon-web" {
     ami = "${lookup(var.ec2ami, var.region)}"
     instance_type = "t2.micro"
     key_name = "${lookup(var.keypair, var.region)}"
+    subnet_id = "${aws_subnet.public-subnet.id}"
     private_ip = "10.0.7.7"
-    iam_instance_profile = "${aws_iam_instance_profile.webtier-profile.name}"
+    vpc_security_group_ids = [
+        "${aws_security_group.web_traffic.id}",
+        "${aws_security_group.admin_access.id}"
+    ]
       
     tags {
         Name = "tsalon-web"    
@@ -149,12 +143,11 @@ resource "aws_instance" "tsalon-web" {
             user = "admin"
         }  
     }
-
 }
 
 resource "aws_eip" "web-tier-ip-address" {
     vpc = true
-    associate_with_private_ip = "10.0.7.7"
+    depends_on = ["aws_internet_gateway.tsalon-public-gateway"]
 }
 
 resource "aws_eip_association" "eip-web-association" {
