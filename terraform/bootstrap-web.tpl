@@ -51,6 +51,6 @@ sudo systemctl enable gu-tsalon
 sudo mkdir -p /var/log/tsalon
 sudo cp ~/nginx-tsalon /etc/nginx/sites-available/tsalon
 sudo ln -s /etc/nginx/sites-available/tsalon /etc/nginx/sites-enabled/tsalon
-sudo /etc/init.d/nginx stop
-sudo /etc/init.d/nginx start
+sudo service stop nginx
+sudo service start nginx
 date
